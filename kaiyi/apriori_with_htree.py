@@ -92,7 +92,7 @@ class HTree:
             if len(node.bucket) == self.max_leaf_cnt:
                 # bucket has reached its maximum capacity and its intermediate node so
                 # split and redistribute entries.
-                for old_itemset, old_cnt in node.bucket.iteritems():
+                for old_itemset, old_cnt in node.bucket.items():
 
                     hash_key = self.hash(old_itemset[index])
                     if hash_key not in node.children:
@@ -275,13 +275,13 @@ def print_rules(rules):
 
 if __name__ == '__main__':
     transactions = load_data('../data/processed/Oct2019Purchases.csv')
-    # print find_frequent_one(transactions, 5)
-    print(transactions)
 
-    # frequent = apriori_generate_frequent_itemsets(transactions, 2)
-    # # for item in frequent:
-    # #     if len(item[0]) > 1:
-    # #         print item
+ 
 
-    # a_rules = generate_association_rules(frequent, 0.5)
-    # print_rules(a_rules)
+    frequent = apriori_generate_frequent_itemsets(transactions, 2)
+    # for item in frequent:
+    #     if len(item[0]) > 1:
+    #         print item
+
+    a_rules = generate_association_rules(frequent, 0.5)
+    print_rules(a_rules)
