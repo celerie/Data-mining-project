@@ -14,7 +14,7 @@ def load_data(filename):
     for i in df:
         t = i[1:-1]
         ls = t.split(', ')
-        transactions.append(set(ls))
+        transactions.append(set([int(i) for i in ls]))
 
     return transactions
 
@@ -38,7 +38,7 @@ def find_frequent_one(data_set, support):
     frequent_1 = []
     for key, cnt in candidate_one.items():
         # check if given item has sufficient count.
-        if cnt >= (support * total / 100):
+        if cnt >= support:
             frequent_1.append(([key], cnt))
     return frequent_1
 
@@ -132,7 +132,7 @@ class HTree:
 
     def dfs(self, node, support_cnt):
         if node.isLeaf:
-            for key, value in node.bucket.iteritems():
+            for key, value in node.bucket.items():
                 if value >= support_cnt:
                     self.frequent_itemsets.append((list(key), value))
                     # print key, value, support_cnt
@@ -194,7 +194,6 @@ def apriori_generate_frequent_itemsets(dataset, support):
     :return: List of f-itemsets with their respective count in
             form of list of tuples.
     """
-    support_cnt = int(support / 100.0 * len(dataset))
     all_frequent_itemsets = find_frequent_one(dataset, support)
     prev_frequent = [x[0] for x in all_frequent_itemsets]
     length = 2
@@ -220,7 +219,7 @@ def apriori_generate_frequent_itemsets(dataset, support):
             h_tree.add_support(subset)
 
         # find frequent itemsets
-        new_frequent = h_tree.get_frequent_itemsets(support_cnt)
+        new_frequent = h_tree.get_frequent_itemsets(support)
         all_frequent_itemsets.extend(new_frequent)
         prev_frequent = [tup[0] for tup in new_frequent]
         prev_frequent.sort()
@@ -275,13 +274,13 @@ def print_rules(rules):
 
 if __name__ == '__main__':
     transactions = load_data('../data/processed/Oct2019Purchases.csv')
-
+    print(find_frequent_one(transactions, 2))
  
 
     frequent = apriori_generate_frequent_itemsets(transactions, 2)
-    # for item in frequent:
-    #     if len(item[0]) > 1:
-    #         print item
+    for item in frequent:
+        if len(item[0]) > 1:
+            print(item)
 
-    a_rules = generate_association_rules(frequent, 0.5)
+    a_rules = generate_association_rules(frequent, 0.1)
     print_rules(a_rules)
