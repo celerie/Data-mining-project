@@ -1,4 +1,5 @@
-import csv, itertools, parameters
+import csv, itertools
+import pandas as pd
 
 
 def load_data(filename):
@@ -7,9 +8,15 @@ def load_data(filename):
     :param filename:
     :return:
     """
-    reader = csv.reader(open(filename, 'r'), delimiter=',')
-    trans = [map(int, row[1:]) for row in reader]
-    return trans
+    df = pd.read_csv('../data/processed/Oct2019Purchases.csv')
+    df = df['product_id']
+    transactions = []
+    for i in df:
+        t = i[1:-1]
+        ls = t.split(', ')
+        transactions.append(set(ls))
+
+    return transactions
 
 
 def find_frequent_one(data_set, support):
@@ -267,12 +274,14 @@ def print_rules(rules):
     print('Total Rules Generated: ', len(rules))
 
 if __name__ == '__main__':
-    transactions = load_data('1000-out1.csv')
+    transactions = load_data('../data/processed/Oct2019Purchases.csv')
     # print find_frequent_one(transactions, 5)
-    frequent = apriori_generate_frequent_itemsets(transactions, parameters.SUPPORT)
-    # for item in frequent:
-    #     if len(item[0]) > 1:
-    #         print item
+    print(transactions)
 
-    a_rules = generate_association_rules(frequent, parameters.CONFIDENCE)
-    print_rules(a_rules)
+    # frequent = apriori_generate_frequent_itemsets(transactions, 2)
+    # # for item in frequent:
+    # #     if len(item[0]) > 1:
+    # #         print item
+
+    # a_rules = generate_association_rules(frequent, 0.5)
+    # print_rules(a_rules)
