@@ -27,7 +27,7 @@ def find_frequent_one(data_set, support):
     :return:
     """
     candidate_one = {}
-    total = len(data_set)
+    #total = len(data_set)
     for row in data_set:
         for val in row:
             if val in candidate_one:
@@ -258,8 +258,8 @@ def generate_association_rules(f_itemsets, confidence):
 
             lefts = map(list, itertools.combinations(itemset[0], i))
             for left in lefts:
-                conf = 100.0 * union_support / hash_map[tuple(left)]
-                if conf >= confidence:
+                conf = union_support / hash_map[tuple(left)]
+                if conf >= float(confidence):
                     a_rules.append([left,list(set(itemset[0]) - set(left)), conf])
     return a_rules
 
@@ -269,18 +269,26 @@ def print_rules(rules):
     for item in rules:
         left = ','.join(map(str, item[0]))
         right = ','.join(map(str, item[1]))
-        print (' ==> '.join([left, right]))
+        print (' ==> '.join([left, right]), end='\t')
+        print(item[2])
     print('Total Rules Generated: ', len(rules))
 
 if __name__ == '__main__':
-    transactions = load_data('../data/processed/Oct2019Purchases.csv')
-    print(find_frequent_one(transactions, 2))
+    #transactions = load_data('../data/processed/Oct2019Purchases.csv')
  
+    data = [
+    {"1", "2", "3", "3"},
+    {"1", "2", "3"},
+    {"1", "3"},
+    {"1", "2", "3"},
+    {"1", "2"},
+    {"1", "2", "3"},
+    {"3", "2"}
+    ]
+    frequent = apriori_generate_frequent_itemsets(data, 2)
+    # for item in frequent:
+    #     if len(item[0]) > 1:
+    #         print(item)
 
-    frequent = apriori_generate_frequent_itemsets(transactions, 2)
-    for item in frequent:
-        if len(item[0]) > 1:
-            print(item)
-
-    a_rules = generate_association_rules(frequent, 0.1)
+    a_rules = generate_association_rules(frequent, 0.6)
     print_rules(a_rules)
