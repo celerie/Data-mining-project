@@ -22,6 +22,25 @@ def load_data(filename, colname):
 
     return transactions
 
+def encode_strings(transactions):
+    dic = {}
+    id = 0
+    for t in transactions:
+        for item in t:
+            if item not in dic:
+                dic[item] = id
+                id += 1
+    
+    encoded_transactions = []
+    for transaction in transactions:
+        converted_list = []
+        for item in transaction:
+            converted_list.append(dic[item])
+        encoded_transactions.append(set(converted_list))
+    
+    return encoded_transactions
+
+
 
 def find_frequent_one(data_set, support):
     """
@@ -281,6 +300,9 @@ def print_rules(rules):
 
 if __name__ == '__main__':
     transactions = load_data('../data/processed/groceries.csv', 'itemDescription')
+    transactions = encode_strings(transactions)
+    print(transactions)
+
  
     # data = [
     # {"1", "2", "3", "3"},
@@ -296,13 +318,14 @@ if __name__ == '__main__':
 
     start = time.process_time()
 
-    frequent = apriori_generate_frequent_itemsets(transactions, 2)
+    frequent = apriori_generate_frequent_itemsets(transactions, 149)
     print("Frequent Itemsets:")
     for item in frequent:
             print(item[0], "Support = ", item[1])
+    print('Total Frequent Itemsets Generated: ', len(frequent))
 
     print()
-    a_rules = generate_association_rules(frequent, 0.1)
+    a_rules = generate_association_rules(frequent, 0.0001)
     print("Association rules:")
     print_rules(a_rules)
 
