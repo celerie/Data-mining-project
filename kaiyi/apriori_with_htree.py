@@ -1,20 +1,24 @@
 import csv, itertools
 import pandas as pd
+import time
 
 
-def load_data(filename):
+def load_data(filename, colname):
     """
     Loads transactions from given file
     :param filename:
     :return:
     """
-    df = pd.read_csv('../data/processed/Oct2019Purchases.csv')
-    df = df['product_id']
+    df = pd.read_csv(filename)
+    df = df[colname]
     transactions = []
     for i in df:
         t = i[1:-1]
         ls = t.split(', ')
-        transactions.append(set([int(i) for i in ls]))
+        try:
+            transactions.append(set([int(i) for i in ls]))
+        except:
+            transactions.append(set([i for i in ls]))
 
     return transactions
 
@@ -152,7 +156,7 @@ class HTree:
         return self.frequent_itemsets
 
     def hash(self, val):
-        return val % self.max_child_cnt
+        return val % 11
 
 
 def generate_hash_tree(candidate_itemsets, length, max_leaf_cnt=4, max_child_cnt=5):
@@ -203,9 +207,9 @@ def apriori_generate_frequent_itemsets(dataset, support):
             j = i + 1
             while j < len(prev_frequent) and is_prefix(prev_frequent[i], prev_frequent[j]):
                 # this part makes sure that all of the items remain lexicographically sorted.
-                new_candidates.append(prev_frequent[i][:-1] +
-                                      [prev_frequent[i][-1]] +
-                                      [prev_frequent[j][-1]]
+                new_candidates.append(prev_frequent[i][:-1] + #prefix
+                                      [prev_frequent[i][-1]] + #last element of i
+                                      [prev_frequent[j][-1]] #last element of j
                                       )
                 j += 1
 
@@ -233,7 +237,9 @@ def generate_association_rules(f_itemsets, confidence):
     This method generates association rules with confidence greater than threshold
     confidence. For finding confidence we don't need to traverse dataset again as we
     already have support of frequent itemsets.
-    Remember Anti-monotone property ?
+
+
+    Anti-monotone property
     I've done pruning in this step also, which reduced its complexity significantly:
     Say X -> Y is AR which don't have enough confidence then any other rule X' -> Y'
     where (X' subset of X) is not possible as sup(X') >= sup(X).
@@ -260,7 +266,7 @@ def generate_association_rules(f_itemsets, confidence):
             for left in lefts:
                 conf = union_support / hash_map[tuple(left)]
                 if conf >= float(confidence):
-                    a_rules.append([left,list(set(itemset[0]) - set(left)), conf])
+                    a_rules.append([left,list(set(itemset[0]).difference(set(left))), conf])
     return a_rules
 
 
@@ -269,26 +275,35 @@ def print_rules(rules):
     for item in rules:
         left = ','.join(map(str, item[0]))
         right = ','.join(map(str, item[1]))
-        print (' ==> '.join([left, right]), end='\t')
+        print(' ==> '.join([left, right]), end='\t')
         print(item[2])
     print('Total Rules Generated: ', len(rules))
 
 if __name__ == '__main__':
-    #transactions = load_data('../data/processed/Oct2019Purchases.csv')
+    transactions = load_data('../data/processed/groceries.csv', 'itemDescription')
  
-    data = [
-    {"1", "2", "3", "3"},
-    {"1", "2", "3"},
-    {"1", "3"},
-    {"1", "2", "3"},
-    {"1", "2"},
-    {"1", "2", "3"},
-    {"3", "2"}
-    ]
-    frequent = apriori_generate_frequent_itemsets(data, 2)
-    # for item in frequent:
-    #     if len(item[0]) > 1:
-    #         print(item)
+    # data = [
+    # {"1", "2", "3", "3"},
+    # {"1", "2", "3"},
+    # {"1", "3"},
+    # {"1", "2", "3"},
+    # {"1", "2"},
+    # {"1", "2", "3"},
+    # {"3", "2"}
+    # ]
 
-    a_rules = generate_association_rules(frequent, 0.6)
+
+
+    start = time.process_time()
+
+    frequent = apriori_generate_frequent_itemsets(transactions, 2)
+    print("Frequent Itemsets:")
+    for item in frequent:
+            print(item[0], "Support = ", item[1])
+
+    print()
+    a_rules = generate_association_rules(frequent, 0.1)
+    print("Association rules:")
     print_rules(a_rules)
+
+    print(time.process_time() - start)
