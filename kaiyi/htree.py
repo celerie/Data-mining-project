@@ -7,7 +7,7 @@ class HashTreeNode:
 
 def generate_candidates(frequent_items, k):
 
-    #print(k, frequent_items)
+    print(k, frequent_items)
     candidates = set([])
     for item1 in frequent_items:
         for item2 in frequent_items:
@@ -44,7 +44,7 @@ def apriori_algorithm(transactions, min_support, min_confidence):
         #candidates = prune_candidates(candidates, hash_tree, k - 1)
 
         # Calculate support for candidates
-        frequent_itemsets = [itemset for itemset in candidates if calculate_support(transactions, itemset) >= min_support]
+        frequent_itemsets = [itemset for itemset in candidates if calculate_support(transactions, itemset) >= min_support] #this will be used to generate the k+1 candidate sets
 
         support_counts.update({frozenset(itemset): calculate_support(transactions, itemset) for itemset in frequent_itemsets})
 
